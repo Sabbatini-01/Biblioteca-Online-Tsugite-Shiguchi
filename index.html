@@ -1107,13 +1107,6 @@
 
         <div class="campo-controle">
           <label class="linha-checkbox">
-            <input type="checkbox" id="controle-fundo">
-            Mostrar o ambiente como fundo (céu/estúdio visível)
-          </label>
-        </div>
-
-        <div class="campo-controle">
-          <label class="linha-checkbox">
             <input type="checkbox" id="controle-auto-rotacao" checked>
             Girar automaticamente
           </label>
@@ -1635,22 +1628,6 @@
     controleSombraSuavidade.addEventListener("input", () => {
       viewerEl.setAttribute("shadow-softness", controleSombraSuavidade.value);
       valorSombraSuavidade.textContent = Number(controleSombraSuavidade.value).toFixed(2);
-    });
-
-    controleAmbiente.addEventListener("change", () => {
-      viewerEl.setAttribute("environment-image", controleAmbiente.value);
-      // Se o fundo estiver ativado, atualiza o céu junto com o ambiente
-      if (controleFundo.checked) {
-        viewerEl.setAttribute("skybox-image", controleAmbiente.value);
-      }
-    });
-
-    controleFundo.addEventListener("change", () => {
-      if (controleFundo.checked) {
-        viewerEl.setAttribute("skybox-image", controleAmbiente.value);
-      } else {
-        viewerEl.removeAttribute("skybox-image");
-      }
     });
 
     controleAutoRotacao.addEventListener("change", () => {
