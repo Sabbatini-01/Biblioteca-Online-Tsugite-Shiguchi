@@ -1199,15 +1199,17 @@
                     maiúsculas/minúsculas), ou "" se ainda não quiser
                     classificar esse modelo.
 
-      Você NÃO precisa mais preencher nenhum ícone/imagem de miniatura: a
-      miniatura da lateral é gerada sozinha, tirando uma "foto" automática
-      do próprio modelo 3D assim que a página carrega.
+      - miniatura: (opcional) nome de uma imagem estática (.jpg, .png etc.)
+                   que será usada como miniatura na lista da biblioteca.
+                   Se não preencher, a miniatura é gerada automaticamente
+                   tirando uma "foto" do próprio modelo 3D.
     */
     const modelos = [
       
     {
         nome: "01. Aritsugi - 腰掛蟻継",
         arquivo: "Aritsugi.glb",
+        miniatura: "Aritsugi_02.jpg",
         descricao: "Tipo de encaixe mais simples, em formado de 'cauda de andorinha' com poucos detalhes nos cortes da madeira. Em testes, aguentou até 480 kg (SUMIYOSHI, T. et al. 1991). Exemplo de Tsugite.",
         imagens: [
           { arquivo: "Aritsugi_01.jpg", legenda: "Foto de uma peça original. Disponível em: <https://i.ytimg.com/vi/CcGjICyy_po/maxresdefault.jpg>. Acesso em 21/08/2026."},
@@ -1221,6 +1223,7 @@
       {
               nome: "02. Kamatsugi - 腰掛鎌継",
         arquivo: "Kamatsugi.glb",
+        miniatura: "Kamatsugi_02.jpg",
         descricao: "Peça japonesa de encaixe com formato em 'pescoço de ganso' (Stepped Gooseneck Splice). Aguenta até 2400kg de carga, muito mais resistente que sua semelhante mais simplificada, a Koshikake Aritsugi (cauda de andorinha) (SUMIYOSHI, T. et al. 1991). Exemplo de Tsugite. ",
         imagens: [
           { arquivo: "Kamatsugi_01.jpg", legenda: "Desenho feito a mão pelo autor. Fonte: Do Autor (Adaptado). Disponível em: <https://www.aisf.or.jp/~jaanus/deta/k/koshikakekamatsugi.htm>. Acesso em: 9 Jul. 2026." },
@@ -1233,6 +1236,7 @@
       {
         nome: "03. Kirikumitsugi - 切組継",
         arquivo: "Kanawatsugi.glb",
+        miniatura: "Kanawatsugi_02.jpg",
         descricao: "Conta com diversos tipos diferentes dentro da mesma categoria, de travamento de peças com um pino (kumisen). A mais comum é denominada de Okkake Daisen Tsugi. Em testes, aguentou até 4000 kg (SUMIYOSHI, T. et al. 1991). Exemplo de Tsugite.",
         imagens: [
           { arquivo: "Kanawatsugi_01.jpg", legenda: "Desenho feito a mão pelo autor.  Fonte: Do Autor. Adaptado de CARDONA VELASQUEZ, J. F. Japanese Joinery Techniques Explained.  Academia.edu. p. 8-9. s.d."},
@@ -1623,10 +1627,20 @@
       modelos.forEach((modelo, indice) => {
         const botao = document.createElement("button");
         botao.className = "item-modelo";
-        botao.innerHTML = `<span class="miniatura carregando" id="miniatura-${indice}"></span><span>${modelo.nome}</span>`;
+        botao.innerHTML = `<span class="miniatura${modelo.miniatura ? "" : " carregando"}" id="miniatura-${indice}"></span><span>${modelo.nome}</span>`;
         botao.addEventListener("click", () => carregarModelo(indice));
         listaEl.appendChild(botao);
-        gerarMiniatura(modelo, indice);
+
+        if (modelo.miniatura) {
+          // Usa imagem estática diretamente — sem precisar renderizar o 3D
+          const miniaturaEl = document.getElementById(`miniatura-${indice}`);
+          if (miniaturaEl) {
+            miniaturaEl.style.backgroundImage = `url(${modelo.miniatura})`;
+          }
+        } else {
+          // Fallback: gera miniatura automaticamente a partir do modelo 3D
+          gerarMiniatura(modelo, indice);
+        }
       });
     }
 
@@ -1766,6 +1780,27 @@
           modelo.arquivo = valor;
           renderizarListaBiblioteca();
           if (window.indiceAtual === indice) carregarModelo(indice);
+        }
+      }));
+
+      // Miniatura estática — imagem que aparece ao lado do nome na biblioteca
+      card.appendChild(criarCampoEditor({
+        rotulo: "Miniatura da biblioteca (imagem estática, ex: foto_01.jpg)",
+        valorInicial: modelo.miniatura || "",
+        aoSair: (valor) => {
+          modelo.miniatura = valor || undefined;
+          // Atualiza só a miniatura deste item, sem regerar a lista inteira
+          const miniaturaEl = document.getElementById(`miniatura-${indice}`);
+          if (miniaturaEl) {
+            if (valor) {
+              miniaturaEl.classList.remove("carregando");
+              miniaturaEl.style.backgroundImage = `url(${valor})`;
+            } else {
+              miniaturaEl.style.backgroundImage = "";
+              miniaturaEl.classList.add("carregando");
+              gerarMiniatura(modelo, indice);
+            }
+          }
         }
       }));
 
